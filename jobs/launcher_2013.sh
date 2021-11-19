@@ -10,6 +10,6 @@ module load launcher
 
 export LD_PRELOAD=""
 export LAUNCHER_WORKDIR=/work/08317/m1ch3ll3/stampede2/pm25_grid_zip
-export LAUNCHER_JOB_FILE=jobs_2013
+export LAUNCHER_JOB_FILE=jobs/jobs_2013
 
 ${LAUNCHER_DIR}/paramrun
