@@ -4,7 +4,7 @@ output:
     keep_md: true
 ---
 
-# pm25_2013
+# pm25
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = F)
@@ -17,17 +17,51 @@ library(sf)
 library(viridis)
 ```
 
+## 2005
+
 ```{r}
-pm25_2013 <- "../data/output/local/extractions_2013" %>% 
+pm25_2005 <- "../data/output/local/pm25_2005/" %>% 
   list.files(full.names = TRUE) %>% 
   lapply(function(x) st_as_sf(read_rds(x))) %>% 
   bind_rows()
 
-write_rds(pm25_2013, "../data/output/pm25_2013.rds")
+write_rds(pm25_2005, "../data/output/local/pm25_2005.rds")
+
+pm25_2005 %>% 
+  st_simplify() %>% 
+  ggplot() + 
+  geom_sf(aes(fill = zip_concentrations), colour = NA, lwd = 0) + 
+  scale_fill_viridis()
 ```
 
+## 2013
+
 ```{r}
+pm25_2013 <- "../data/output/local/pm25_2013/" %>% 
+  list.files(full.names = TRUE) %>% 
+  lapply(function(x) st_as_sf(read_rds(x))) %>% 
+  bind_rows()
+
+write_rds(pm25_2013, "../data/output/local/pm25_2013.rds")
+
 pm25_2013 %>% 
+  st_simplify() %>% 
+  ggplot() + 
+  geom_sf(aes(fill = zip_concentrations), colour = NA, lwd = 0) + 
+  scale_fill_viridis()
+```
+
+## 2014
+
+```{r}
+pm25_2014 <- "../data/output/local/pm25_2014/" %>% 
+  list.files(full.names = TRUE) %>% 
+  lapply(function(x) st_as_sf(read_rds(x))) %>% 
+  bind_rows()
+
+write_rds(pm25_2014, "../data/output/local/pm25_2014.rds")
+
+pm25_2014 %>% 
   st_simplify() %>% 
   ggplot() + 
   geom_sf(aes(fill = zip_concentrations), colour = NA, lwd = 0) + 
