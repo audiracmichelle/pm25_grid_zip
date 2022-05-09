@@ -1,0 +1,76 @@
+---
+output: 
+  html_document:
+    keep_md: true
+---
+
+# mets
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F)
+```
+
+```{r, include=FALSE}
+library(tidyverse)
+library(magrittr)
+library(raster)
+library(sf)
+library(viridis)
+
+```
+
+## met raster
+
+```{r}
+mets <- read_rds("../data/input/mets.rds")
+```
+
+```{r}
+mets[[1]] %>% 
+  rasterToPolygons() %>% 
+  st_as_sf() %>% 
+  ggplot() +
+  geom_sf(
+    aes(fill = temp), 
+    color = NA
+    )
+```
+
+## download zipcode polygons
+
+```{r}
+crs_wgs84 = "+proj=longlat +datum=WGS84"
+zip_sp = shapefile("../data/input/local/gz_2010_us_860_00_500k/gz_2010_us_860_00_500k.shp")
+zip_sp = spTransform(zip_sp, CRSobj=CRS(crs_wgs84))
+```
+
+## crosswalk example
+
+```{r}
+rast = projectRaster(mets[[1]], crs=crs_wgs84)
+zip_sp$zip_concentrations = 0
+  
+# iterating over zip codes
+pbar = progress::progress_bar$new(total=nrow(zip_sp))
+for (i in 1:nrow(zip_sp)) {
+  zip_i = zip_sp[i, ]
+  rast_i = try(crop(rast, extent(zip_i)), silent = T)
+  if(class(rast_i) != "try-error"){
+    rast_i = rasterToPolygons(rast_i)
+    if(!is.null(rast_i)) {
+      zip_sp$zip_concentrations[i] = over(zip_i, rast_i, fn = mean)[[1]]
+    } else zip_sp$zip_concentrations[i] = NA
+  } else zip_sp$zip_concentrations[i] = NA
+  
+  pbar$tick()
+}
+```
+
+```{r}
+zip_sp %>% 
+  st_as_sf() %>% 
+  st_simplify() %>% 
+  ggplot() + 
+  geom_sf(aes(fill = zip_concentrations), colour = NA, lwd = 0) + 
+  scale_fill_viridis()
+```
